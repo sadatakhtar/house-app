@@ -1,12 +1,18 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { db } from "../firebase.config";
 import visibilityIcon from "../assets/svg/visibilityIcon.svg";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    name: "",
     email: "",
     password: "",
   });
@@ -18,7 +24,30 @@ const SignUp = () => {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.id]: e.target.value,
-    }))
+    }));
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const user = userCredential.user
+
+      updateProfile(user.currentUser, {
+        displayName: name
+      })
+
+      navigate('/')
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -28,8 +57,8 @@ const SignUp = () => {
           <p className="pageHeader">Sign Up</p>
         </header>
         <main>
-          <form>
-          <input
+          <form onSubmit={onSubmit}>
+            <input
               type="text"
               className="nameInput"
               placeholder="Name"
@@ -42,7 +71,8 @@ const SignUp = () => {
               className="emailInput"
               placeholder="Email"
               SignIn
-              signIn id="email"
+              signIn
+              id="email"
               value={email}
               onChange={onChange}
             />
@@ -74,11 +104,11 @@ const SignUp = () => {
               </button>
             </div>
           </form>
-           {/* Google oAuth */}
+          {/* Google oAuth */}
 
-           <Link to='/sign-in' className="registerLink">
+          <Link to="/sign-in" className="registerLink">
             Sign in instead
-           </Link>
+          </Link>
         </main>
       </div>
     </>
@@ -86,4 +116,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-
